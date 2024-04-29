@@ -15,7 +15,7 @@ resource "null_resource" "generate-api-key" {
   depends_on = [nebius_resourcemanager_folder_iam_member.sa-editor]
   provisioner "local-exec" {
     command = <<EOT
-      sa_editor_id="${nebius_iam_service_account.bastion-sa.id}"
+      sa_editor_id="${nebius_iam_service_account.bastion-sa.name}"
       ncp iam key create --service-account-name $sa_editor_id --output key.json
 EOT
   }
