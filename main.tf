@@ -2,7 +2,8 @@ resource "nebius_compute_filesystem" "k8s-shared-storage" {
   name  = "k8s-shared-storage"
   type  = "network-ssd"
   zone  = "eu-north1-c"
-  size  = 4000
+  size  = 40960
+  block_size = 32768
 }
 
 resource "null_resource" "attach-filestore" {
