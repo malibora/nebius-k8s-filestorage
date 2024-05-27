@@ -1,9 +1,9 @@
 resource "nebius_compute_filesystem" "k8s-shared-storage" {
-  name  = "k8s-shared-storage"
-  type  = "network-ssd"
-  zone  = "eu-north1-c"
-  size  = 40960
-  block_size = 32768
+  name      = "k8s-shared-storage"
+  folder_id = var.folder_id
+  type      = "network-ssd"
+  zone      = "eu-north1-c"
+  size      = 40
 }
 
 resource "null_resource" "attach-filestore" {
@@ -32,13 +32,11 @@ EOT
   }
 }
 
-
-
-
 module "kube-cluster" {
   source = "github.com/nebius/terraform-nb-kubernetes.git?ref=1.0.4"
 
   network_id = nebius_vpc_network.k8s-network.id
+  folder_id  = var.folder_id
 
   master_locations = [
     {
@@ -56,17 +54,17 @@ module "kube-cluster" {
     }
   ]
   node_groups = {
-     "k8s-ng-1g-system" = {
-       description = "Kubernetes nodes group 01 with fixed 1 size scaling"
-       fixed_scale = {
-         size = 2
-       }
-       node_labels = {
-         "group" = "system"
-       }
-       # node_taints = ["CriticalAddonsOnly=true:NoSchedule"]
-     }
-    "k8s-ng-a100-8gpu3" = {
+    k8s-ng-1g-system = {
+      description = "Kubernetes nodes group 01 with fixed 1 size scaling"
+      fixed_scale = {
+        size = 2
+      }
+      node_labels = {
+        "group" = "system"
+      }
+      # node_taints = ["CriticalAddonsOnly=true:NoSchedule"]
+    }
+    k8s-ng-a100-8gpu3 = {
       description = "Kubernetes nodes h100-1-gpu nodes with autoscaling"
       fixed_scale = {
         size = 3
@@ -79,10 +77,10 @@ module "kube-cluster" {
       disk_type       = "network-ssd-nonreplicated"
       disk_size       = 372
       node_labels = {
-        "group" = "a100-1gpu" 
-      	"nebius.com/gpu" = "A100"
-      	"nebius.com/gpu-a100" = "A100"
-      }		
+        "group"               = "a100-1gpu"
+        "nebius.com/gpu"      = "A100"
+        "nebius.com/gpu-a100" = "A100"
+      }
     }
   }
 }
